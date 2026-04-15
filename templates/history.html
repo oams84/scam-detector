@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan History - Scam Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: #1f6feb;
+            font-weight: bold;
+        }
+
+        .entry {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .likely-scam {
+            background: #ffe5e5;
+            border-color: #e57373;
+        }
+
+        .suspicious {
+            background: #fff4db;
+            border-color: #f0b64d;
+        }
+
+        .low-risk {
+            background: #e7f7ea;
+            border-color: #5fb878;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        ul {
+            margin-top: 8px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .clear-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .clear-btn:hover {
+            background: #b52b27;
+        }
+
+        .empty {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        form {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <h1>Scan History</h1>
+
+            <div class="actions">
+                <a href="/">← Back to Analyzer</a>
+
+                <form method="POST" action="/clear-history" onsubmit="return confirm('Clear all scan history?');">
+                    <button type="submit" class="clear-btn">Clear History</button>
+                </form>
+            </div>
+        </div>
+
+        {% if history %}
+            {% for item in history|reverse %}
+                {% set verdict_class = '' %}
+                {% if item.verdict == 'Likely Scam' %}
+                    {% set verdict_class = 'likely-scam' %}
+                {% elif item.verdict == 'Suspicious' %}
+                    {% set verdict_class = 'suspicious' %}
+                {% else %}
+                    {% set verdict_class = 'low-risk' %}
+                {% endif %}
+
+                <div class="entry {{ verdict_class }}">
+                    <p><span class="label">Message:</span> {{ item.message }}</p>
+                    <p><span class="label">Verdict:</span> {{ item.verdict }}</p>
+                    <p><span class="label">Risk Score:</span> {{ item.risk_score }}%</p>
+
+                    {% if item.reasons %}
+                        <p><span class="label">Reasons:</span></p>
+                        <ul>
+                            {% for reason in item.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No suspicious indicators found.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">No scan history yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

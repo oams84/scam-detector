@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scam Detector</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 12px;
+            margin-bottom: 18px;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #1f6feb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1558b0;
+        }
+
+        .result {
+            margin-top: 28px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .likely-scam {
+            background: #ffe5e5;
+            border: 1px solid #e57373;
+        }
+
+        .suspicious {
+            background: #fff4db;
+            border: 1px solid #f0b64d;
+        }
+
+        .low-risk {
+            background: #e7f7ea;
+            border: 1px solid #5fb878;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .score {
+            font-size: 18px;
+            margin-top: 8px;
+        }
+
+        .verdict {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #1f6feb;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .api-box {
+            margin-top: 30px;
+            background: #f8fafc;
+            border: 1px solid #d9e2ec;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .api-box h2 {
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #111827;
+            color: #f9fafb;
+            padding: 14px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .mini {
+            color: #5b6470;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <div>
+                <h1>Scam Detector</h1>
+                <p>Paste a suspicious message, SMS, or transcript below to analyze whether it may be a scam.</p>
+            </div>
+            <div>
+                <a href="/history">View History</a>
+            </div>
+        </div>
+
+        <form method="POST">
+            <textarea name="message" placeholder="Paste message here...">{{ message }}</textarea>
+            <br>
+            <button type="submit">Analyze Message</button>
+        </form>
+
+        {% if result %}
+            {% set verdict_class = '' %}
+            {% if result.verdict == 'Likely Scam' %}
+                {% set verdict_class = 'likely-scam' %}
+            {% elif result.verdict == 'Suspicious' %}
+                {% set verdict_class = 'suspicious' %}
+            {% else %}
+                {% set verdict_class = 'low-risk' %}
+            {% endif %}
+
+            <div class="result {{ verdict_class }}">
+                <div class="verdict">{{ result.verdict }}</div>
+                <div class="score"><span class="label">Risk Score:</span> {{ result.risk_score }}%</div>
+
+                {% if result.reasons %}
+                    <p class="label">Reasons:</p>
+                    <ul>
+                        {% for reason in result.reasons %}
+                            <li>{{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No suspicious indicators found.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="api-box">
+            <h2>API Example</h2>
+            <p class="mini">Use the API endpoint below to analyze messages programmatically.</p>
+
+            <p><span class="label">Endpoint:</span> <code>/api/analyze</code></p>
+            <p><span class="label">Method:</span> <code>POST</code></p>
+            <p><span class="label">Content-Type:</span> <code>application/json</code></p>
+
+            <p class="label">Sample request:</p>
+            <div class="code-block">curl -X POST http://127.0.0.1:5000/api/analyze \
+-H "Content-Type: application/json" \
+-d '{"message":"Your bank account is suspended! Click here to verify: http://fake-bank.com"}'</div>
+
+            <p class="label" style="margin-top:16px;">Sample JSON body:</p>
+            <div class="code-block">{
+  "message": "Congratulations! You won a gift card. Click here now!"
+}</div>
+        </div>
+
+        <div class="footer">
+            Demo version: rule-based scam detection using keywords, links, urgency, and financial indicators.
+        </div>
+
+    </div>
+</body>
+</html>
